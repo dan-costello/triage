@@ -80,17 +80,17 @@ jobs:
       - name: Commit and tag
         run: |
           git add package.json src-tauri/tauri.conf.json src-tauri/Cargo.toml
-          git commit -m "Bump version to ${{ steps.bump.outputs.new_version }}
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>"
+          git commit -m "Bump version to ${{ steps.bump.outputs.new_version }}" \
+            -m "" \
+            -m "🤖 Generated with Claude Code" \
+            -m "" \
+            -m "Co-Authored-By: Claude <noreply@anthropic.com>"
           git tag "v${{ steps.bump.outputs.new_version }}"
           git push origin main
           git push origin "v${{ steps.bump.outputs.new_version }}"
 
   build-tauri:
-    if: always()
+    if: always() && (needs.bump-version.result == 'success' || needs.bump-version.result == 'skipped')
     needs: [bump-version]
     permissions:
       contents: write
