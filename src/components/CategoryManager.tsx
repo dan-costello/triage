@@ -13,7 +13,7 @@ const PRESET_COLORS = [
 ];
 
 export default function CategoryManager({ categories, onAddCategory, onDeleteCategory }: CategoryManagerProps) {
-  const [isAdding, setIsAdding] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
   const getAvailableColors = () => {
@@ -42,86 +42,82 @@ export default function CategoryManager({ categories, onAddCategory, onDeleteCat
       });
       setNewCategoryName('');
       setSelectedColor(getRandomAvailableColor());
-      setIsAdding(false);
+      setIsExpanded(false);
     }
   };
 
-  const handleOpenForm = () => {
-    setIsAdding(true);
-    setSelectedColor(getRandomAvailableColor());
-  };
-
   return (
-    <div className="mb-4">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Categories</h2>
-        {!isAdding && (
-          <button
-            onClick={handleOpenForm}
-            className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs"
-          >
-            + Add
-          </button>
-        )}
-      </div>
+    <div className="mb-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full p-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700"
+      >
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Manage Categories</h2>
+        <span className="text-gray-500 dark:text-gray-400 text-sm">{isExpanded ? '▼' : '▶'}</span>
+      </button>
+      {isExpanded && (
+        <div className="px-3 pb-3">
+          <form onSubmit={handleSubmit} className="mb-3">
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="Category name"
+                className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700"
+                autoFocus
+              />
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-600 dark:text-gray-400">Color:</span>
+                <div
+                  className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600"
+                  style={{ backgroundColor: selectedColor }}
+                />
+                <span className="text-xs text-gray-500 dark:text-gray-400">(randomly assigned)</span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="flex-1 px-3 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm font-medium"
+                >
+                  Add
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(false)}
+                  className="px-3 py-1.5 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-100 rounded hover:bg-gray-400 dark:hover:bg-gray-500 text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </form>
 
-      {isAdding && (
-        <form onSubmit={handleSubmit} className="mb-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
-          <input
-            type="text"
-            value={newCategoryName}
-            onChange={(e) => setNewCategoryName(e.target.value)}
-            placeholder="Category name"
-            className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded mb-2 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700"
-            autoFocus
-          />
-          <div className="mb-2 flex items-center gap-2">
-            <span className="text-xs text-gray-600 dark:text-gray-400">Color:</span>
-            <div
-              className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600"
-              style={{ backgroundColor: selectedColor }}
-            />
-            <span className="text-xs text-gray-500 dark:text-gray-400">(randomly assigned)</span>
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="px-3 py-1.5 bg-green-500 text-white rounded hover:bg-green-600 text-xs"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsAdding(false);
-                setNewCategoryName('');
-              }}
-              className="px-3 py-1.5 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-400 dark:hover:bg-gray-500 text-xs"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+          {categories.length > 0 && (
+            <div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">Existing categories:</div>
+              <div className="flex flex-wrap gap-1.5">
+                {categories.map((category) => (
+                  <div
+                    key={category.id}
+                    className="px-2 py-1 rounded-full text-white text-xs font-medium flex items-center gap-1.5"
+                    style={{ backgroundColor: category.color }}
+                  >
+                    <span>{category.name}</span>
+                    <button
+                      onClick={() => onDeleteCategory(category.id)}
+                      className="hover:bg-black/20 rounded-full w-3.5 h-3.5 flex items-center justify-center text-xs leading-none"
+                      title="Delete category"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       )}
-
-      <div className="flex flex-wrap gap-1.5">
-        {categories.map((category) => (
-          <div
-            key={category.id}
-            className="px-2 py-1 rounded-full text-white text-xs font-medium flex items-center gap-1.5"
-            style={{ backgroundColor: category.color }}
-          >
-            <span>{category.name}</span>
-            <button
-              onClick={() => onDeleteCategory(category.id)}
-              className="hover:bg-black/20 rounded-full w-3.5 h-3.5 flex items-center justify-center text-xs leading-none"
-              title="Delete category"
-            >
-              ×
-            </button>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

@@ -64,9 +64,9 @@ export default function App() {
   }
 
   return (
-    <main className="h-screen w-full bg-gray-100 dark:bg-gray-900 overflow-y-auto overflow-x-hidden flex flex-col">
+    <main className="h-screen w-full bg-gray-100 dark:bg-gray-900 flex flex-col overflow-hidden">
       <div
-        className="w-full h-8 bg-gray-200 dark:bg-gray-800 flex items-center justify-between px-2 cursor-move select-none"
+        className="w-full h-8 bg-gray-200 dark:bg-gray-800 flex items-center justify-between px-2 cursor-move select-none flex-shrink-0"
         data-tauri-drag-region
       >
         <div className="w-12 h-1 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
@@ -87,17 +87,18 @@ export default function App() {
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto px-3 pb-3">
-        <header className="mb-4 pt-3">
+      <div className="flex-1 flex flex-col overflow-hidden px-3 pb-3">
+        <header className="mb-4 pt-3 flex-shrink-0">
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Tasks</h1>
         </header>
 
-        <CategoryManager categories={categories} onAddCategory={handleAddCategory} onDeleteCategory={handleDeleteCategory} />
+        <div className="flex-shrink-0">
+          <CategoryManager categories={categories} onAddCategory={handleAddCategory} onDeleteCategory={handleDeleteCategory} />
+          <TaskForm categories={categories} onAddTask={handleAddTask} />
+        </div>
 
-        <TaskForm categories={categories} onAddTask={handleAddTask} />
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-4">
-          <div className="flex border-b border-gray-200 dark:border-gray-700 text-xs">
+        <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden">
+          <div className="flex border-b border-gray-200 dark:border-gray-700 text-xs flex-shrink-0">
             <button
               onClick={() => setActiveTab('active')}
               className={`flex-1 px-2 py-2 font-medium ${
@@ -130,7 +131,7 @@ export default function App() {
             </button>
           </div>
 
-          <div className="p-3">
+          <div className="flex-1 overflow-y-auto p-3">
             {(activeTab === 'active' || activeTab === 'done') && (
               <div className="mb-3 flex flex-col gap-1.5">
                 <span className="text-xs text-gray-600 dark:text-gray-400">View by:</span>
