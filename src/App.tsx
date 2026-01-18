@@ -55,6 +55,12 @@ export default function App() {
     ));
   };
 
+  const handleEditTask = (taskId: string, newText: string) => {
+    setTasks(tasks.map(task =>
+      task.id === taskId ? { ...task, title: newText } : task
+    ));
+  };
+
   if (!categoriesLoaded || !tasksLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
@@ -167,6 +173,7 @@ export default function App() {
                 onDeleteTask={handleDeleteTask}
                 onChangePriority={handleChangePriority}
                 onChangeCategory={handleChangeCategory}
+                onEditTask={handleEditTask}
                 showCompleted={false}
                 sortBy={sortBy}
               />
@@ -179,6 +186,7 @@ export default function App() {
                 onDeleteTask={handleDeleteTask}
                 onChangePriority={handleChangePriority}
                 onChangeCategory={handleChangeCategory}
+                onEditTask={handleEditTask}
                 showCompleted={true}
                 sortBy={sortBy}
               />

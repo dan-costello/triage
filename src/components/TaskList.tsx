@@ -8,13 +8,16 @@ interface TaskListProps {
   onDeleteTask: (taskId: string) => void;
   onChangePriority: (taskId: string, priority: 'today' | 'soon' | 'later') => void;
   onChangeCategory?: (taskId: string, categoryId: string) => void;
+  onEditTask: (taskId: string, newText: string) => void;
   showCompleted?: boolean;
   sortBy?: 'category' | 'priority';
 }
 
-export default function TaskList({ tasks, categories, onToggleTask, onDeleteTask, onChangePriority, onChangeCategory, showCompleted = false, sortBy = 'category' }: TaskListProps) {
+export default function TaskList({ tasks, categories, onToggleTask, onDeleteTask, onChangePriority, onChangeCategory, onEditTask, showCompleted = false, sortBy = 'category' }: TaskListProps) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
   const filteredTasks = tasks.filter(task => task.completed === showCompleted);
 
   const toggleGroup = (groupKey: string) => {
@@ -59,6 +62,27 @@ export default function TaskList({ tasks, categories, onToggleTask, onDeleteTask
       onChangeCategory(selectedTask, groupKey);
     }
     setSelectedTask(null);
+  };
+
+  const handleStartEdit = (task: Task, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingTask(task.id);
+    setEditText(task.title);
+  };
+
+  const handleSaveEdit = (taskId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (editText.trim()) {
+      onEditTask(taskId, editText.trim());
+    }
+    setEditingTask(null);
+    setEditText('');
+  };
+
+  const handleCancelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingTask(null);
+    setEditText('');
   };
 
   const groupedTasks = sortBy === 'priority'
@@ -151,6 +175,47 @@ export default function TaskList({ tasks, categories, onToggleTask, onDeleteTask
                   {groupTasks.map((task) => {
                     const priorityInfo = getPriorityLabel(task.priority);
                     const isSelected = selectedTask === task.id;
+                    const isEditing = editingTask === task.id;
+
+                    if (isEditing) {
+                      return (
+                        <div
+                          key={task.id}
+                          className="flex items-center gap-2 p-2 rounded bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <input
+                            type="text"
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="flex-1 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleSaveEdit(task.id, e as any);
+                              } else if (e.key === 'Escape') {
+                                handleCancelEdit(e as any);
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={(e) => handleSaveEdit(task.id, e)}
+                            className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs"
+                            title="Save"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="px-2 py-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-100 rounded hover:bg-gray-400 dark:hover:bg-gray-500 text-xs"
+                            title="Cancel"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      );
+                    }
+
                     return (
                       <div
                         key={task.id}
@@ -193,6 +258,13 @@ export default function TaskList({ tasks, categories, onToggleTask, onDeleteTask
                             {new Date(task.completedAt).toLocaleDateString()}
                           </span>
                         )}
+                        <button
+                          onClick={(e) => handleStartEdit(task, e)}
+                          className="opacity-0 group-hover:opacity-100 text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm leading-none flex-shrink-0"
+                          title="Edit task"
+                        >
+                          ✏️
+                        </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -242,6 +314,46 @@ export default function TaskList({ tasks, categories, onToggleTask, onDeleteTask
                       const category = getCategoryById(task.categoryId);
                       if (!category) return null;
                       const isSelected = selectedTask === task.id;
+                      const isEditing = editingTask === task.id;
+
+                      if (isEditing) {
+                        return (
+                          <div
+                            key={task.id}
+                            className="flex items-center gap-2 p-2 rounded bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="text"
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              className="flex-1 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleSaveEdit(task.id, e as any);
+                                } else if (e.key === 'Escape') {
+                                  handleCancelEdit(e as any);
+                                }
+                              }}
+                            />
+                            <button
+                              onClick={(e) => handleSaveEdit(task.id, e)}
+                              className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs"
+                              title="Save"
+                            >
+                              ✓
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-2 py-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-100 rounded hover:bg-gray-400 dark:hover:bg-gray-500 text-xs"
+                              title="Cancel"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        );
+                      }
 
                       return (
                       <div
@@ -277,6 +389,13 @@ export default function TaskList({ tasks, categories, onToggleTask, onDeleteTask
                             {new Date(task.completedAt).toLocaleDateString()}
                           </span>
                         )}
+                        <button
+                          onClick={(e) => handleStartEdit(task, e)}
+                          className="opacity-0 group-hover:opacity-100 text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm leading-none flex-shrink-0"
+                          title="Edit task"
+                        >
+                          ✏️
+                        </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
